@@ -1,7 +1,9 @@
-import mist
 import gleam/erlang/process
-import gleam/bytes_builder
-import gleam/http/response.{Response}
+import gleam/http/request.{type Request}
+import gleam/http/response.{type Response}
+import mist.{type ResponseData}
+
+import pages
 
 pub fn main() {
   let assert Ok(_) =
@@ -12,7 +14,19 @@ pub fn main() {
   process.sleep_forever()
 }
 
-fn web_service(_request) {
-  let body = bytes_builder.from_string("Hello, Stranger!")
-  Response(200, [], mist.Bytes(body))
+fn web_service(req: Request(a)) -> Response(ResponseData) {
+  case request.path_segments(req) {
+    [] -> {
+      pages.from_string("index", 200)
+    }
+    ["greet"] -> {
+      pages.greet("stranger")
+    }
+    ["greet", name] -> {
+      pages.greet(name)
+    }
+    _ -> {
+      pages.from_string("404 - Not Found", 404)
+    }
+  }
 }
