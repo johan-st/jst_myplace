@@ -1,20 +1,14 @@
 # jst_myplace
+*Resumé, portfolio, and blog*
 
-[![Package Version](https://img.shields.io/hexpm/v/jst_myplace)](https://hex.pm/packages/jst_myplace)
-[![Hex Docs](https://img.shields.io/badge/hex-docs-ffaff3)](https://hexdocs.pm/jst_myplace/)
+## Fly.io
+deployed at [jst-myplace.fly.dev](https://jst-myplace.fly.dev)
 
 ```sh
-gleam add jst_myplace@1
-```
-```gleam
-import jst_myplace
-
-pub fn main() {
-  // TODO: An example of the project in use
-}
+# deploy current version
+flyctl deploy
 ```
 
-Further documentation can be found at <https://hexdocs.pm/jst_myplace>.
 
 ## Development
 
@@ -22,3 +16,24 @@ Further documentation can be found at <https://hexdocs.pm/jst_myplace>.
 gleam run   # Run the project
 gleam test  # Run the tests
 ```
+
+## Notes
+
+### todos
+- [ ] make sure to only render static content once
+  - prerender static content on startup or..
+  - prerender static content on first request 
+- [ ] blog
+- [ ] resume
+- [ ] portfolio
+- [ ] use markdown for content
+- [ ] collect stats
+- [ ] demonstrate power of the BEAM somehow...
+- [ ] show performance stats and system info on page
+- [ ] add a contact form
+- [ ] write tests where it makes sense
+
+### ideas
+- [ ] use llm inference for chatbot
+- [ ] set up live chat with me
+- [ ] have a "Back Stage" section technically minded people (developers etc.)
