@@ -22,6 +22,9 @@ fn web_service(_deps) -> fn(Request(a)) -> Response(ResponseData) {
       [] -> {
         pages.from_string("index", 200)
       }
+      ["debug"] -> {
+        pages.debug(req)
+      }
       ["greet"] -> {
         pages.greet("stranger")
       }
