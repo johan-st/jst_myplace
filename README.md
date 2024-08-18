@@ -23,6 +23,7 @@ gleam test  # Run the tests
 - [ ] make sure to only render static content once
   - prerender static content on startup or..
   - prerender static content on first request 
+  - prerender the parts of dynamic content that are static
 - [ ] blog
 - [ ] resume
 - [ ] portfolio
