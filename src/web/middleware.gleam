@@ -1,3 +1,6 @@
+import gleam/http/request
+import gleam/io
+import gleam/string_builder
 import wisp
 
 /// global middleware is applied to all requests
@@ -20,4 +23,26 @@ pub fn global(
 
   // Handle the request!
   handle_request(req)
+}
+
+pub fn require_auth_header(
+  req: wisp.Request,
+  _handle_request: fn(wisp.Request) -> wisp.Response,
+) {
+  // check if the request has a valid auth token
+  // if not, return a 401 response
+  case request.get_header(req, "Authorization") {
+    Ok("Basic " <> token) -> {
+      let _ = io.debug("auth token was: " <> token)
+      wisp.json_response(
+        string_builder.from_string("{'message': 'Authorized'}"),
+        200,
+      )
+    }
+    _ ->
+      wisp.response(401)
+      |> wisp.string_body(
+        "401 - Not Authorized.\nAuthorization header is required. (format: 'Authorization: Basic <token>')",
+      )
+  }
 }

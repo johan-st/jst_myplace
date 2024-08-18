@@ -1,18 +1,36 @@
 import gleam/http.{Get}
+
+import lustre/attribute.{type Attribute}
 import lustre/element.{type Element}
 import lustre/element/html.{html}
+import web/pages/api_docs
+import web/pages/home
 import wisp.{type Request, type Response}
 
-pub fn home_page(req: Request) -> Response {
+fn html_base(body: List(Element(a)), title: String) -> Element(a) {
+  html([], [
+    html.head([], [
+      html.title([], title),
+      // TODO: consider injecting base styles and scripts into the document to avoid requests
+      html.link([
+        attribute.rel("stylesheet"),
+        attribute.href("/static/base.css"),
+      ]),
+      html.script(
+        [attribute.attribute("load", "defer"), attribute.src("/static/main.js")],
+        "",
+      ),
+    ]),
+    html.body([], body),
+  ])
+}
+
+// HOME/INDEX
+pub fn home(req: Request) -> Response {
   use <- wisp.require_method(req, Get)
 
-  let content = [
-    html.h1([], [html.text("Welcome to the home page!")]),
-    html.p([], [html.text("This is a simple web app written in Gleam.")]),
-  ]
-
   let html =
-    content
+    [home.view()]
     |> html_base("Home | jst_myplace")
     |> element.to_document_string_builder
 
@@ -20,6 +38,15 @@ pub fn home_page(req: Request) -> Response {
   |> wisp.html_body(html)
 }
 
-fn html_base(body: List(Element(a)), title: String) -> Element(a) {
-  html([], [html.head([], [html.title([], title)]), html.body([], body)])
+// API DOCS
+pub fn api_docs(req: Request) -> Response {
+  use <- wisp.require_method(req, Get)
+
+  let html =
+    [api_docs.view()]
+    |> html_base("API Docs | jst_myplace")
+    |> element.to_document_string_builder
+
+  wisp.ok()
+  |> wisp.html_body(html)
 }

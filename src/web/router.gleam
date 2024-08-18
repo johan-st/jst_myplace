@@ -1,25 +1,39 @@
 import gleam/http.{Get, Post}
 import gleam/string_builder
+import web/api
 import web/middleware
 import web/pages
 import wisp.{type Request, type Response}
 
 pub fn root() -> fn(Request) -> Response {
   // Closure for setting up the router.
+  let assert Ok(priv) = wisp.priv_directory("jst_myplace")
+
+  let api_router = api.router()
   fn(req: Request) -> Response {
     use req <- middleware.global(req)
 
     case wisp.path_segments(req) {
-      [] -> pages.home_page(req)
-      ["comments"] -> comments(req)
-      ["comments", id] -> show_comment(req, id)
-
+      [] -> pages.home(req)
+      // Static files
+      ["static", _] -> serve_static(req, priv)
+      // Content Pages
+      ["api"] -> pages.api_docs(req)
+      // API routes
+      ["api", ..path_remaining] -> {
+        use req <- middleware.require_auth_header(req)
+        api_router(req, path_remaining)
+      }
       _ -> wisp.not_found()
     }
   }
 }
 
+fn serve_static(req: Request, from: String) -> Response {
+  use <- wisp.serve_static(req, under: "/static", from: from)
 
+  wisp.not_found()
+}
 
 fn comments(req: Request) -> Response {
   case req.method {
