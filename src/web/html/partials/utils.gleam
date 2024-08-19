@@ -28,8 +28,6 @@ pub fn view_nav_link(link: NavLink) -> Element(wisp.Body) {
 
 pub fn view_time_since(time: birl.Time) -> Element(wisp.Body) {
   birl.difference(birl.utc_now(), time)
-  // why is this necessary? 
-  |> duration.scale_up(100)
   |> duration.decompose
   |> list.map(int_unit_to_string)
   |> list.filter(fn(s) { s != "" })
