@@ -1,6 +1,7 @@
 import birl
 import birl/duration.{
-  Day, Hour, MicroSecond, MilliSecond, Minute, Month, Second, Week, Year,
+  type Duration, Day, Hour, MicroSecond, MilliSecond, Minute, Month, Second,
+  Week, Year,
 }
 import gleam/int
 import gleam/io
@@ -26,8 +27,8 @@ pub fn view_nav_link(link: NavLink) -> Element(wisp.Body) {
   }
 }
 
-pub fn view_time_since(time: birl.Time) -> Element(wisp.Body) {
-  birl.difference(birl.utc_now(), time)
+pub fn view_duration(dur: Duration) -> Element(wisp.Body) {
+  dur
   |> duration.decompose
   |> list.map(int_unit_to_string)
   |> list.filter(fn(s) { s != "" })
@@ -52,3 +53,4 @@ fn int_unit_to_string(int_unit) -> String {
     MicroSecond -> ""
   }
 }
+

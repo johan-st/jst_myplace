@@ -1,6 +1,7 @@
 import context
 import envoy
 import gleam/erlang/process
+import logging as l
 import mist
 import wisp
 
@@ -8,13 +9,15 @@ import wisp
 import web/router
 
 pub fn main() {
-  wisp.configure_logger()
+  l.configure()
+  l.set_level(l.Debug)
 
   // Environment variables
   let secret_key_base = case envoy.get("SECRET_KEY_BASE") {
     Ok(secret_key_base) -> secret_key_base
     Error(_) -> {
-      wisp.log_notice(
+      l.log(
+        l.Notice,
         "SECRET_KEY_BASE not set. using random key. (not suitable for multi-node deployment and will interfere with session management)",
       )
       wisp.random_string(64)

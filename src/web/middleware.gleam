@@ -1,6 +1,6 @@
 import gleam/http/request
-import gleam/io
 import gleam/string_builder
+import logging as l
 import wisp
 
 /// global middleware is applied to all requests
@@ -33,7 +33,7 @@ pub fn require_auth_header(
   // if not, return a 401 response
   case request.get_header(req, "Authorization") {
     Ok("Basic " <> token) -> {
-      let _ = io.debug("auth token was: " <> token)
+      let _ = l.log(l.Debug, "auth token was: " <> token)
       wisp.json_response(
         string_builder.from_string("{'message': 'Authorized'}"),
         200,

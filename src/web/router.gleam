@@ -1,14 +1,28 @@
 import context.{type ServerContext}
+import gleam/dict.{type Dict}
+import gleam/list
+import gleam/result
+import logging as l
+import simplifile as file
 import web/api
+import web/blog
 import web/html/pages
 import web/middleware
 import wisp.{type Request, type Response}
 
 pub fn root(ctx: ServerContext) -> fn(Request) -> Response {
   // Closure for setting up the router.
-  let assert Ok(priv) = wisp.priv_directory("jst_myplace")
+  let priv = context.priv_directory(ctx)
+  // blog
+  let blog_posts: List(blog.Post) =
+    blog.posts_from_dir(context.priv_directory(ctx) <> "/blog")
+
+  let view_blog_index = pages.blog_index(blog_posts)
+  let view_blog_post = pages.blog_post(blog_posts)
+
   let api_router = api.router()
 
+  // The router function.
   fn(req) {
     use req <- middleware.global(req)
 
@@ -18,7 +32,8 @@ pub fn root(ctx: ServerContext) -> fn(Request) -> Response {
       ["static", _] -> serve_static(req, priv <> "/web_assets")
       // Content Pages
       ["api"] -> pages.api_docs(ctx)
-      // ["blog"] -> pages.blog_index(req)
+      ["blog"] -> view_blog_index(ctx)
+      ["blog", slug] -> view_blog_post(ctx, slug)
       // API routes
       ["api", ..path_remaining] -> {
         use req <- middleware.require_auth_header(req)
@@ -34,6 +49,23 @@ fn serve_static(req: Request, from: String) -> Response {
 
   wisp.not_found()
 }
+
+// fn log_res_blog(res: Result(blog.Post, blog.BlogError)) {
+//   case res {
+//     Ok(post) -> {
+//       l.log(l.Info, "file: " <> post.file_path <> ": OK")
+//       res
+//     }
+//     Error(blog_err) -> {
+//       l.log(l.Info, case blog_err {
+//         blog.FileError(p, e) ->
+//           "file: " <> p <> ", file error: " <> file.describe_error(e)
+//         blog.ParseError(p, e) -> "file: " <> p <> ", parse error: " <> e
+//       })
+//       res
+//     }
+//   }
+// }
 
 // fn comments(req: Request) -> Response {
 //   case req.method {

@@ -38,3 +38,12 @@ gleam test  # Run the tests
 - [ ] use llm inference for chatbot
 - [ ] set up live chat with me
 - [ ] have a "Back Stage" section technically minded people (developers etc.)
+- [ ] use filespy to watch for changes and reload the server when running in localy
+- [ ] maybe fetch jot/md from a git repo
+
+
+## used libraries
+
+### jot
+parsing tests are based on the ones in [jot](https://hexdocs.pm/jot/)
+

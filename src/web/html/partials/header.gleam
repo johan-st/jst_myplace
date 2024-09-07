@@ -7,6 +7,7 @@ import wisp
 pub fn view() -> Element(wisp.Body) {
   let nav_links = [
     Internal("/", "Home"),
+    Internal("/blog", "Blog"),
     Internal("/api", "API Docs"),
   ]
   html.header([], [
