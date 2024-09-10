@@ -5,13 +5,10 @@ import gleam/list
 import gleam/option.{type Option}
 import gleam/result
 import gleam/string
-import jot
-import lustre/element.{type Element}
-import simplifile.{type FileError} as file
-import wisp.{type Body}
+import simplifile as file
 
 pub type Post {
-  Post(frontmatter: Frontmatter, document: jot.Document)
+  Post(frontmatter: Frontmatter, document: String)
 }
 
 pub type Frontmatter {
@@ -47,7 +44,7 @@ fn post_from_string(file_content content: String) -> Result(Post, Nil) {
     Ok(parts) -> {
       let #(frontmatter_string, content_string) = parts
       let frontmatter = parse_frontmatter(frontmatter_string)
-      let doc = jot.parse(content_string)
+      let doc = content_string
       case frontmatter {
         Ok(fm) -> Ok(Post(frontmatter: fm, document: doc))
         _ -> Error(Nil)
