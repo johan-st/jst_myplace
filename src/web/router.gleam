@@ -1,3 +1,4 @@
+import gleam/io
 import context.{type ServerContext}
 import gleam/dict.{type Dict}
 import gleam/list
@@ -15,7 +16,8 @@ pub fn root(ctx: ServerContext) -> fn(Request) -> Response {
   let priv = context.priv_directory(ctx)
   // blog
   let blog_posts: List(blog.Post) =
-    blog.posts_from_dir(context.priv_directory(ctx) <> "/blog")
+    blog.posts_from_dir(context.priv_directory(ctx) <> "/posts")
+    |> io.debug
 
   let view_blog_index = pages.blog_index(blog_posts)
   let view_blog_post = pages.blog_post(blog_posts)

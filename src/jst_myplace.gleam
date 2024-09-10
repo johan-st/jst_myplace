@@ -4,6 +4,7 @@ import gleam/erlang/process
 import logging as l
 import mist
 import wisp
+import wisp/wisp_mist
 
 // web specific imports
 import web/router
@@ -28,7 +29,7 @@ pub fn main() {
 
   // start web server
   let assert Ok(_) =
-    wisp.mist_handler(router.root(ctx), secret_key_base)
+    wisp_mist.handler(router.root(ctx), secret_key_base)
     |> mist.new
     |> mist.port(8080)
     |> mist.start_http

@@ -4,7 +4,7 @@ title: test
 date: 2024-08-18
 slug: tst
 summary: just a test document
-tag: first,my_post,test
+tags: first,my_post,test
 ---
 
 # Test

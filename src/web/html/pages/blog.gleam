@@ -42,7 +42,7 @@ fn view_post_listitem(post: blog.Post) -> Element(Body) {
 pub fn view_post(post: blog.Post) -> Element(Body) {
   [
     html.h1([], [html.text(post.frontmatter.title)]),
-    element_from_string(post.document),
+    element_from_string(post.html),
   ]
   |> element.fragment
 }

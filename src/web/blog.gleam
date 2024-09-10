@@ -1,108 +1,115 @@
 import birl
 import filepath
 import gleam/dict
+import gleam/dynamic.{type DecodeError, bool, field, string}
+import gleam/io
+import gleam/json
 import gleam/list
-import gleam/option.{type Option}
+import gleam/option.{type Option, None, Some}
 import gleam/result
 import gleam/string
 import simplifile as file
 
 pub type Post {
-  Post(frontmatter: Frontmatter, document: String)
+  Post(frontmatter: Frontmatter, html: String)
+}
+
+pub type FrontmatterIntermediate {
+  FrontmatterIntermediate(
+    draft: Bool,
+    title: String,
+    publish_date: String,
+    slug: String,
+    summary: String,
+    tags: String,
+    uid: String,
+  )
 }
 
 pub type Frontmatter {
   Frontmatter(
+    draft: Bool,
     title: String,
-    slug: String,
     publish_date: Option(birl.Time),
+    slug: String,
+    summary: String,
     tags: List(String),
+    uid: String,
   )
+}
+
+pub fn frontmatter_from_json(
+  json: String,
+) -> Result(Frontmatter, json.DecodeError) {
+  let decoder =
+    dynamic.decode7(
+      FrontmatterIntermediate,
+      field("draft", of: bool),
+      field("title", of: string),
+      field("date", of: string),
+      field("slug", of: string),
+      field("summary", of: string),
+      field("tags", of: string),
+      field("uid", of: string),
+    )
+
+  let split_tags = fn(tags: String) -> List(String) {
+    tags
+    |> string.split(",")
+    |> list.map(string.trim)
+  }
+
+  json.decode(from: json, using: decoder)
+  |> result.map(fn(fm) {
+    let date = case birl.parse(fm.publish_date) {
+      Ok(d) -> Some(d)
+      Error(_) -> None
+    }
+    Frontmatter(
+      draft: fm.draft,
+      title: fm.title,
+      publish_date: date,
+      slug: fm.slug,
+      summary: fm.summary,
+      tags: fm.tags |> split_tags,
+      uid: fm.uid,
+    )
+  })
 }
 
 pub fn posts_from_dir(dir: String) -> List(Post) {
   case file.read_directory(dir) {
     Ok(files_and_folders) ->
       files_and_folders
+      |> io.debug
       |> list.map(filepath.join(dir, _))
-      |> list.filter(string.ends_with(_, ".md"))
-      |> list.filter_map(file.read)
-      |> list.map(post_from_string)
+      |> list.filter(string.ends_with(_, ".html"))
+      |> list.map(post_from_file)
+      |> io.debug
       |> result.values
     Error(_) -> []
   }
 }
 
-fn post_from_string(file_content content: String) -> Result(Post, Nil) {
-  let split_string =
-    result.or(
-      string.split_once(content, "\n---\n"),
-      string.split_once(content, "\r\n---\r\n"),
-    )
-
-  case split_string {
-    Ok(parts) -> {
-      let #(frontmatter_string, content_string) = parts
-      let frontmatter = parse_frontmatter(frontmatter_string)
-      let doc = content_string
-      case frontmatter {
-        Ok(fm) -> Ok(Post(frontmatter: fm, document: doc))
-        _ -> Error(Nil)
-      }
-    }
-    Error(Nil) -> Error(Nil)
-  }
+pub type BlogError {
+  FileError
+  DecodeError
 }
 
-pub fn parse_frontmatter(
-  frontmatter_string str: String,
-) -> Result(Frontmatter, String) {
-  let front_dict =
-    str
-    |> string.split("\n")
-    |> list.map(string.trim)
-    |> list.filter(string.contains(_, ":"))
-    |> list.map(parse_frontmatter_line)
-    |> result.values
-    |> dict.from_list
+pub fn post_from_file(file_path: String) -> Result(Post, Nil) {
+  let html_res = file.read(file_path)
+  let data_res = file.read(file_path |> string.replace(".html", ".json"))
 
-  let res_title = dict.get(front_dict, "title")
-
-  let res_slug = dict.get(front_dict, "slug")
-
-  let publish_date =
-    dict.get(front_dict, "publish_date")
-    |> result.try(birl.parse)
-    |> option.from_result
-
-  let tags =
-    dict.get(front_dict, "tags")
-    |> result.map(string.split(_, ","))
-    |> result.map(list.map(_, string.trim))
-    |> fn(res) {
-      case res {
-        Ok(tags) -> tags
-        Error(_) -> []
+  case html_res, data_res {
+    Ok(html), Ok(data) -> {
+      case frontmatter_from_json(data) {
+        Ok(fm) -> Ok(Post(frontmatter: fm, html: html))
+        Error(err) -> {
+          io.debug(err)
+          Error(Nil)
+        }
       }
     }
-
-  case res_title, res_slug, publish_date, tags {
-    Ok(title), Ok(slug), date, tags -> Ok(Frontmatter(title, slug, date, tags))
-    Error(Nil), _, _, _ -> Error("missing title")
-    _, Error(Nil), _, _ -> Error("missinng slug")
-  }
-}
-
-// Frontmatter(
-//     title: String,
-//     slug: String,
-//     publish_date: Option(birl.Time),
-//     tags: List(String),
-//     file_path: String,
-//   )
-fn parse_frontmatter_line(line: String) -> Result(#(String, String), String) {
-  case string.split_once(line, ":") {
-    Ok(#(key, value)) -> Ok(#(key |> string.trim, value |> string.trim))
-    Error(Nil) -> Error("Failed to split line")
+    _, _ -> Error(Nil)
   }
 }
