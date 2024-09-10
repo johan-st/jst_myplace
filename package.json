@@ -1,0 +1,17 @@
+{
+  "name": "jst_myplace",
+  "version": "1.0.0",
+  "description": "*Resumé, portfolio, and blog*",
+  "main": "index.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "build": "node ./scripts/build"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@djot/djot": "^0.3.1"
+  }
+}
