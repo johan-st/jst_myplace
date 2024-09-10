@@ -4,15 +4,23 @@ import gleam/list
 import gleam/string
 
 pub type Example {
-  Example(file: String, djot: String, html: String)
+  Example(file: String, input: String, html: String)
 }
 
-const cases_directory = "test/parsing_test/cases"
+const djot_dir = "test/djot_parsing_test/cases"
+const jd_dir = "test/jd_parsing_test/cases"
 
-pub fn load_example_test_cases() -> List(Example) {
-  let assert Ok(tests) = simplifile.read_directory(cases_directory)
+pub fn load_djot_example_test_cases() -> List(Example) {
+  let assert Ok(tests) = simplifile.read_directory(djot_dir)
   tests
-  |> list.map(filepath.join(cases_directory, _))
+  |> list.map(filepath.join(djot_dir, _))
+  |> list.flat_map(load_and_parse_file)
+}
+
+pub fn load_jd_example_test_cases() -> List(Example) {
+  let assert Ok(tests) = simplifile.read_directory(jd_dir)
+  tests
+  |> list.map(filepath.join(jd_dir, _))
   |> list.flat_map(load_and_parse_file)
 }
 

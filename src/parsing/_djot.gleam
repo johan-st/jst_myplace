@@ -28,7 +28,7 @@ type Document {
 
 type Block {
   Paragraph(List(Inline))
-  // Heading(List(Inline))
+  // Headin(List(Inline))
   // BlockQ(List(Inline))
   // ListIt(List(Inline))
   // List
