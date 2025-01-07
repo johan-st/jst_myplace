@@ -1,7 +1,7 @@
-import context.{type ServerContext}
 import lustre/attribute
 import lustre/element.{type Element}
 import lustre/element/html.{html}
+import web/context.{type ServerContext}
 import web/html/partials/footer
 import web/html/partials/header
 import wisp

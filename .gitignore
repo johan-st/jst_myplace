@@ -6,3 +6,4 @@ erl_crash.dump
 /priv/posts
 
 node_modules
+.env

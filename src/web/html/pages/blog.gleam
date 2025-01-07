@@ -10,8 +10,8 @@ import web/blog
 import wisp.{type Body}
 
 pub fn view_index(blogs: List(blog.Post)) -> Element(Body) {
-  let _ = io.debug("Rendering blog index")
-  let _ = io.debug(blogs)
+  // let _ = io.debug("Rendering blog index")
+  // let _ = io.debug(blogs)
   [
     html.h1([], [html.text("Blog Index!")]),
     html.p([], [html.text("This is a simple web app written in Gleam.")]),

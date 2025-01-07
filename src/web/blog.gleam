@@ -1,7 +1,7 @@
 import birl
 import filepath
 import gleam/dict
-import gleam/dynamic.{type DecodeError, bool, field, string}
+import gleam/dynamic.{bool, field, string}
 import gleam/io
 import gleam/json
 import gleam/list
@@ -77,22 +77,29 @@ pub fn frontmatter_from_json(
   })
 }
 
-pub fn posts_from_dir(dir: String) -> List(Post) {
+pub fn posts_from_dir(dir: String) -> Result(List(Post), BlogError) {
+  io.debug("Reading posts from dir")
+  io.debug(dir)
   case file.read_directory(dir) {
     Ok(files_and_folders) ->
       files_and_folders
       |> io.debug
       |> list.map(filepath.join(dir, _))
+      |> io.debug
       |> list.filter(string.ends_with(_, ".html"))
+      |> io.debug
       |> list.map(post_from_file)
       |> io.debug
       |> result.values
-    Error(_) -> []
+      |> io.debug
+      |> Ok
+
+    Error(err) -> Error(FileError(dir, err))
   }
 }
 
 pub type BlogError {
-  FileError
+  FileError(file_path: String, error: file.FileError)
   DecodeError
 }
 

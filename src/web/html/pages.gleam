@@ -1,8 +1,8 @@
-import context.{type ServerContext}
 import gleam/dict
 import gleam/list
 import lustre/element
 import web/blog
+import web/context.{type ServerContext}
 import web/html/pages/api_docs
 import web/html/pages/blog as blog_page
 import web/html/pages/home

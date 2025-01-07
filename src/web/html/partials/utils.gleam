@@ -53,4 +53,3 @@ fn int_unit_to_string(int_unit) -> String {
     MicroSecond -> ""
   }
 }
-

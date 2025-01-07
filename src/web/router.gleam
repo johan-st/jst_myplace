@@ -1,12 +1,13 @@
-import gleam/io
-import context.{type ServerContext}
 import gleam/dict.{type Dict}
+import gleam/int
+import gleam/io
 import gleam/list
 import gleam/result
 import logging as l
 import simplifile as file
 import web/api
 import web/blog
+import web/context.{type ServerContext}
 import web/html/pages
 import web/middleware
 import wisp.{type Request, type Response}
@@ -15,9 +16,17 @@ pub fn root(ctx: ServerContext) -> fn(Request) -> Response {
   // Closure for setting up the router.
   let priv = context.priv_directory(ctx)
   // blog
-  let blog_posts: List(blog.Post) =
+  let assert Ok(blog_posts) =
     blog.posts_from_dir(context.priv_directory(ctx) <> "/posts")
-    |> io.debug
+
+  case list.length(blog_posts) {
+    0 -> l.log(l.Error, "No blog posts found")
+    _ ->
+      l.log(
+        l.Debug,
+        "blog_posts loaded: " <> list.length(blog_posts) |> int.to_string,
+      )
+  }
 
   let view_blog_index = pages.blog_index(blog_posts)
   let view_blog_post = pages.blog_post(blog_posts)

@@ -1,5 +1,6 @@
 import birl
 import birl/duration.{type Duration}
+import dotenv_gleam
 import envoy
 import gleam/result
 import wisp
@@ -14,7 +15,6 @@ pub opaque type ServerContext {
 
 pub fn new() -> ServerContext {
   let region_string = envoy.get("FLY_REGION") |> result.unwrap("N/A")
-
 
   let assert Ok(priv) = wisp.priv_directory("jst_myplace")
   let now = birl.utc_now()

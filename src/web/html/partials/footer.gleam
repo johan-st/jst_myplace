@@ -1,7 +1,7 @@
-import context
 import gleam/list
 import lustre/element.{type Element}
 import lustre/element/html.{html}
+import web/context.{type ServerContext}
 import web/html/partials/utils.{External, Internal, view_nav_link}
 import wisp
 

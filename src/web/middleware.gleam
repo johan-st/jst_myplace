@@ -1,5 +1,5 @@
 import gleam/http/request
-import gleam/string_builder
+import gleam/string_tree
 import logging as l
 import wisp
 
@@ -35,7 +35,7 @@ pub fn require_auth_header(
     Ok("Basic " <> token) -> {
       let _ = l.log(l.Debug, "auth token was: " <> token)
       wisp.json_response(
-        string_builder.from_string("{'message': 'Authorized'}"),
+        string_tree.from_string("{'message': 'Authorized'}"),
         200,
       )
     }
