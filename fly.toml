@@ -8,6 +8,9 @@ primary_region = 'arn'
 
 [build]
 
+[env]
+  ERL_AFLAGS = '-proto_dist inet6_tcp -name ${FLY_APP_NAME}-${FLY_IMAGE_REF##*-}@${FLY_PRIVATE_IP} -setcookie "$ERLANG_COOKIE"'
+
 [http_service]
   internal_port = 8080
   force_https = true

@@ -1,16 +1,28 @@
 import dotenv_gleam
 import envoy
+import gleam/dynamic
+import gleam/erlang/atom
+import gleam/erlang/node
+import gleam/erlang/os
 import gleam/erlang/process.{type Pid}
-import gleam/otp/static_supervisor as sup
-import gleam/otp/task
-import gleam/io
-import logging as l
-import scratch
 import gleam/http/request
-import gleam/http/response
+import gleam/http/response.{Response}
 import gleam/httpc
+import gleam/io
+import gleam/bytes_tree
+import gleam/list
+import gleam/option
+import gleam/otp/actor
+import gleam/otp/static_supervisor as sup
+import gleam/otp/supervisor
+import gleam/otp/task
 import gleam/result
+import gleam/string
 import gleeunit/should
+import logging as l
+import mist
+import vendor/nessie_cluster
+import scratch
 
 // my imports
 import notification/actor as ntfy
@@ -30,41 +42,12 @@ pub fn main() {
 
   // dotenv_gleam.config()
   // scratch.curl("https://www.google.com")
-  scratch.main()
+  // scratch.main()
+  dns_cluster_discovery()
   // run() 
-}
-pub fn curl(url: String) {
-  // Prepare a HTTP request record
-  let assert Ok(base_req) =
-    request.to("https://test-api.service.hmrc.gov.uk/hello/world")
-
-  let req =
-    request.prepend_header(base_req, "accept", "application/vnd.hmrc.1.0+json")
-
-  // Send the HTTP request to the server
-  use resp <- result.try(httpc.send(req))
-
-  // We get a response record back
-  resp.status
-  |> should.equal(200)
-
-  resp
-  |> response.get_header("content-type")
-  |> should.equal(Ok("application/json"))
-
-  resp.body
-  |> should.equal("{\"message\":\"Hello World\"}")
-
-  io.debug(resp)
-  Ok(resp)
-}
-
-fn conf_init() {
-
 }
 
 fn run() {
-
   let assert Ok(level) = envoy.get("LOG_LEVEL")
   case level {
     "debug" -> l.set_level(l.Debug)
@@ -75,10 +58,6 @@ fn run() {
   }
 
   io.debug(process.self())
-
-
-
-
   // let assert Ok(sup_pid) =
   //   sup.new(sup.OneForOne)
   //   |> sup.add(sup.supervisor_child("frontend", start_frontend_supervisor(ctx_ntfy)))
@@ -117,3 +96,48 @@ fn run() {
 //   l.log(l.Debug, "Starting HTTP server")
 // }
 
+fn dns_cluster_discovery() {
+  let dns_query = case envoy.get("FLY_APP_NAME") {
+    Ok(app_name) -> nessie_cluster.DnsQuery(app_name <> ".internal")
+    Error(Nil) -> nessie_cluster.Ignore
+  }
+
+  let cluster = nessie_cluster.with_query(nessie_cluster.new(), dns_query)
+  let cluster_worker = fn(_) { nessie_cluster.start_spec(cluster, option.None) }
+
+  // Initialize web server
+  let web =
+    web_service
+    |> mist.new()
+    |> mist.bind("0.0.0.0")
+    |> mist.port(8080)
+
+  let web_worker = fn(_) {
+    web
+    |> mist.start_http()
+    |> result.map_error(fn(e) { actor.InitCrashed(dynamic.from(e)) })
+  }
+
+  let assert Ok(_) =
+    supervisor.start(fn(children) {
+      children
+      |> supervisor.add(supervisor.worker(cluster_worker))
+      |> supervisor.add(supervisor.worker(web_worker))
+    })
+
+  process.sleep_forever()
+}
+
+fn web_service(_request) {
+  let nodes =
+    node.visible()
+    |> list.map(fn(a) { atom.to_string(node.to_atom(a)) })
+    |> string.join(", ")
+
+  let me = atom.to_string(node.to_atom(node.self()))
+
+  // let res = bytes_builder.from_string("me: " <> me <> "\npeers: " <> nodes)
+  let res = bytes_tree.from_string("me: " <> me <> "\npeers: " <> nodes)
+
+  Response(200, [], mist.Bytes(res))
+}

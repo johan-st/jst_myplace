@@ -30,9 +30,12 @@ mist = ">= 4.0.4 and < 5.0.0"
 wisp = ">= 1.5.1 and < 2.0.0"
 dotenv_gleam = ">= 1.0.7 and < 2.0.0"
 gleam_otp = ">= 0.16.0 and < 1.0.0"
+nessie = ">= 0.1.0 and < 1.0.0"
 
 # Local dependencies can be specified with a path
 # my_other_project = { path = "../my_other_project" }
+# nessie_cluster = { path = "../nessie_cluster" } 
+
 
 [dev-dependencies]
 gleeunit = ">= 1.0.0 and < 2.0.0"

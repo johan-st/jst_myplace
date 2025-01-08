@@ -10,8 +10,6 @@ import web/context.{type ServerContext}
 import web/router
 
 pub fn init() {
-  l.configure()
-  l.set_level(l.Debug)
 
   // Environment variables
   let secret_key_base = case envoy.get("SECRET_KEY_BASE") {

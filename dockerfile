@@ -10,6 +10,9 @@ RUN cd /build \
   && rm -r /build
 
 # Run the server
+
+COPY docker-entrypoint.sh /app/docker-entrypoint.sh
+
 WORKDIR /app
-ENTRYPOINT ["/app/entrypoint.sh"]
-CMD ["run"]
+ENTRYPOINT ["/app/docker-entrypoint.sh"]
+CMD ["/app/entrypoint.sh", "run"]

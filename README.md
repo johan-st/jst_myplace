@@ -1,6 +1,10 @@
 # jst_myplace
 *Resumé, portfolio, and blog*
 
+## NOTES
+### nessie_cluster
+nessie_cluster contains a call to list.concat() which was deprecated and now removed. Use list.flatten() instead.
+
 ## Fly.io
 deployed at [jst-myplace.fly.dev](https://jst-myplace.fly.dev)
 

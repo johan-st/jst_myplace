@@ -1,14 +1,18 @@
 import dotenv_gleam
 import envoy
 import events/events
+import gleam/erlang/atom
+import gleam/erlang/node
 import gleam/erlang/process
 import gleam/http/request
 import gleam/http/response
 import gleam/httpc
 import gleam/io
+import gleam/list
 import gleam/otp/task
 import gleam/result
 import gleam/set
+import gleam/string
 import gleeunit/should
 import logging as l
 
@@ -16,6 +20,23 @@ import notification/ntfy
 
 pub fn main() {
   event_run()
+  list_nodes()
+}
+
+fn list_nodes() {
+  let nodes = node.visible()
+  // |> list.map(fn(a) { atom.to_string(node.to_atom(a)) })
+  // |> string.join(", ")
+
+  // let me = atom.to_string(node.to_atom(node.self()))
+  let me = node.self()
+  io.debug(nodes)
+  io.debug(me)
+
+  // l.log(l.Info, "Nodes: {nodes}")
+  // l.log(l.Info, "Me: {me}")
+
+  Nil
 }
 
 fn event_run() {
